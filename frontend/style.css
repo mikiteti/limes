@@ -1,0 +1,39 @@
+#files {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media screen and (max-width: 1200px) {
+    #files {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #files {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem!important;
+    }
+
+    #toolbar {
+        border-radius: 0!important;
+        bottom: 0!important;
+        width: 100vw!important;
+        height: 20vw!important;
+        font-size: 4vw!important;
+    }
+}
+
+.file_block {
+    width: 100%;
+    /* height: 100%; */
+}
+
+.file_preview {
+    aspect-ratio: 1.618;
+}
+
+.file_title {
+    text-align: center;
+}
+
