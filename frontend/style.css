@@ -41,17 +41,27 @@
     text-align: center;
 }
 
-#drawing_screen {
+#draw_screen {
     position: fixed;
-    overflow-y: scroll;
+    overflow: hidden;
     background-color: black;
     inset: 0px 0px 0px 0px;
     border-radius: 0px;
     display: none;
-    scrollbar-gutter: stable;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+}
+
+#canvas_wrap {
+    position: absolute;
+    inset: 0 0 0 0;
 }
 
 #canvas {
     overflow-y: scroll;
+}
+
+#colors .color {
+    width: unset;
+    height: 1em;
+    font-size: 1em;
 }
