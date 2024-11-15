@@ -35,7 +35,9 @@ const errors = [
 ];
 
 const get_file = (body, res) => {
-
+    authenticate_user(body.user_id, body.password, res, () => {
+        res.json("Success: user identified.");
+    });
 }
 
 const new_file = (body, res) => {
@@ -67,10 +69,10 @@ const get_user_data = (body, res) => {
 }
 
 const endpoints = {
-    0: get_file,
-    1: new_file, 
-    2: close_file,
-    3: register_action,
+    get_file: get_file,
+    new_file: new_file, 
+    close_file: close_file,
+    register_action: register_action,
     // ...
 }
 
