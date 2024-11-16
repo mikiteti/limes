@@ -23,7 +23,7 @@
                         <button class="icon_button color_secondary hoverable modal_handler" icon-source="https://icons.getbootstrap.com/assets/icons/search-heart-fill.svg" tm-for="#settings_modal"></button>
                     -->
                     <div id="icons" class="flex color_secondary" style="gap: .5em;">
-                        <i class="fa-solid fa-gear hoverable"></i>
+                        <i class="fa-solid fa-gear hoverable modal_handler" tm-for="#settings_modal"></i>
                         <i class="fa-solid fa-magnifying-glass hoverable"></i>
                     </div>
                     <div class="modal_handler push_right flex color_secondary hoverable" tm-for="#users_modal" style="gap: .2em; align-items: center;">
@@ -109,7 +109,7 @@
             <div class="modal_main">
                 <div class="container">
                     <div class="row">
-                        Sötét Mód <input class="push_right" checked type="checkbox" onclick="tmui.set_theme(this.checked ? 'dark' : 'light')">
+                        Sötét Mód <input id="theme_picker" class="push_right" checked type="checkbox" onclick="main.set_theme(this.checked ? 'dark' : 'light')">
                     </div>
                     <div class="row">
                         Subi Dubi

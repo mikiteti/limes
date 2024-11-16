@@ -16,6 +16,7 @@ const element = {
     create_profile_password: document.querySelector("#create_profile_password"),
     create_profile_password_again: document.querySelector("#create_profile_password_again"),
     create_profile_modal: document.querySelector("#create_profile_modal"),
+    theme_picker: document.querySelector("#theme_picker"),
 }
 
 const ui = {
@@ -36,6 +37,7 @@ const ui = {
     login (res) {
         element.current_user_name.innerHTML = res.name;
         this.rerender_user_list();
+        this.set_theme(res.theme);
     },
 
     logout () {
@@ -89,9 +91,20 @@ const ui = {
         });
     },
 
-    get current_theme() {
-        const theme_list = ["dark", "light"];
+    theme_list: ["dark", "light"], // private
 
-        for (const theme of theme_list) if (document.documentElement.classList.contains(theme)) return theme;
-    }
+    set_theme(theme) {
+        if (this.theme_list.indexOf(theme) == -1) {
+            this.message("Színmód nem található", "error");
+
+            return;
+        } 
+
+        tmui.set_theme(theme);
+        element.theme_picker.checked = (theme=="dark");
+    },
+
+    get current_theme() {
+        for (const theme of this.theme_list) if (document.documentElement.classList.contains(theme)) return theme;
+    },
 };

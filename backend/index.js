@@ -35,6 +35,7 @@ const errors = [
     { id: 4, name: "A jeszavak nem egyeznek." },
     { id: 5, name: "Ez az email cím már foglalt." },
     { id: 6, name: "Helytelen email."},
+    { id: 7, name: "A változtatni próbált beállítás nem található vagy nem változtatható."},
 ];
 
 const get_file = (body, res) => {
@@ -112,15 +113,9 @@ const login = (body, res) => {
 }
 
 const delete_profile = (body, res) => {
-    const { identifier, password } = body;
+    const { id, password } = body;
     
-    if (typeof identifier == "string" && !validate_email(identifier)) {
-        console.error({error: errors[6]});
-        res.json({error: errors[6]});
-        return;
-    }
-
-    tm.get("SELECT * FROM users WHERE " + (typeof identifier == "string" ? "email" : "id") + " = ?", [identifier], (err, user) => {
+    tm.get("SELECT * FROM users WHERE id = ?", [id], (err, user) => {
         if (err) console.error(err.message);
 
         if (user == undefined) {
@@ -135,10 +130,28 @@ const delete_profile = (body, res) => {
             return;
         }
 
-        tm.run("DELETE FROM users WHERE " + (typeof identifier == "string" ? "email" : "id") + " = ?", [identifier], (err2) => {
+        tm.run("DELETE FROM users WHERE id = ?", [id], (err2) => {
             if (err2) console.error(err2.message);
 
             res.json({success: "Felhasználó törölve"});
+        });
+    });
+}
+
+const set_user_property = (body, res) => {
+    const { id, password, property_name, property_value } = body;
+
+    authenticate_user(id, password, res, () => {
+        if (["name", "theme"].indexOf(property_name) == -1) {
+            console.error({error: errors[7]});
+            res.json({error: errors[7]});
+            return;
+        }
+
+        tm.run("UPDATE users SET " + property_name + " = ? WHERE id = ?", [property_value, id], (err) => {
+            if (err) console.error(err.message);
+
+            res.json({success: "Beállítás megváltoztatva."})
         });
     });
 }
@@ -147,6 +160,7 @@ const endpoints = {
     create_profile: create_profile,
     login: login,
     delete_profile: delete_profile,
+    set_user_property: set_user_property,
     get_file: get_file,
     new_file: new_file, 
     close_file: close_file,
