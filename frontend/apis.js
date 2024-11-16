@@ -8,6 +8,38 @@ const apis = {
         return fetch(source+"/request", { cache: "no-store", method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(json) }).then(res => res.json());
     },
 
+    async create_profile (email, name, password) {
+       return await this.request({
+           api_name: "create_profile",
+           body: {
+               email: email,
+               name: name,
+               password: password,
+               theme: ui.current_theme,
+           }
+       })
+    },
+
+    async login (identifier, password) {
+        return await this.request({
+            api_name: "login",
+            body: {
+                identifier: identifier,
+                password: password,
+            }
+        });
+    },
+
+    async delete_profile (identifier = status.current_user.id, password = status.current_user.password) {
+        return await this.request({
+            api_name: "delete_profile",
+            body: {
+                identifier: identifier,
+                password: password,
+            }
+        });
+    },
+
     async get_file(file_id = status.current_file.id, user_id = status.current_user.id, password = status.current_user.password) {
         return await this.request({
             api_name: "get_file",

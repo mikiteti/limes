@@ -54,6 +54,8 @@
 #canvas_wrap {
     position: absolute;
     inset: 0 0 0 0;
+    overflow-y: scroll;
+    scrollbar-width: none;
 }
 
 #canvas {

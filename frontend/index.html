@@ -10,7 +10,7 @@
         <script src="https://kit.fontawesome.com/4eaebaa12d.js" crossorigin="anonymous"></script>
     </head>
     <body>
-                <header style="margin: 1em 0 2em 0">
+        <header style="margin: 1em 0 2em 0">
             <div class="container">
                 <div class="row buttons height_100">
                     <!-- <button style="font-size: 30px; margin-right: .25em;" class="icon_button" tm-source="https://icons.getbootstrap.com/assets/icons/grid.svg" onclick="window.open('http://tetimiki.hu/')"></button> -->
@@ -26,10 +26,10 @@
                         <i class="fa-solid fa-gear hoverable"></i>
                         <i class="fa-solid fa-magnifying-glass hoverable"></i>
                     </div>
-                    <div class="modal_handler push_right flex color_secondary hoverable" tm-for="#user_modal" style="gap: .2em; align-items: center;">
+                    <div class="modal_handler push_right flex color_secondary hoverable" tm-for="#users_modal" style="gap: .2em; align-items: center;">
                         <i class="fa-solid fa-user"></i>
                         <!-- <button class="icon_button" icon-source="https://icons.getbootstrap.com/assets/icons/person-fill.svg"></button> -->
-                        <p class="no_xs">Miki</p>
+                        <p id="current_user_name" class="no_xs">Profil</p>
                     </div>
                 </div>
             </div>
@@ -120,14 +120,10 @@
             </div>
         </div>
 
-        <div id="user_modal" class="modal spin_border narrow">
-            <p class="horizontal_button">Miki</p>
-            <p class="horizontal_button">Riti</p>
-            <p class="horizontal_button">Imcsi</p>
-            <p class="horizontal_button">Csani</p>
-            <p class="horizontal_button gap_before">Új profil</p>
+        <div id="users_modal" class="modal spin_border narrow">
+            <p class="horizontal_button gap_before modal_handler" tm-for="#create_profile_modal">Új profil</p>
             <p class="horizontal_button modal_handler" tm-for="#login_modal">Bejelentkezés</p>
-            <p style="color: var(--color-danger);" class="horizontal_button">
+            <p style="color: var(--color-danger);" class="horizontal_button" onclick="main.logout()">
                 Kijelentkezés
                 <button class="icon_button push_right" tm-source="https://icons.getbootstrap.com/assets/icons/box-arrow-right.svg"></button>
             </p>
@@ -167,7 +163,44 @@
                         <input id="login_password" autocomplete="current-password" type="password" placeholder="Titok123">
                     </div>
                     <div class="row">
-                        <button class="modal_handler push_right" tm-for="#login_modal" tm-role="close">Bejelentkezés</button>
+                        <button class="modal_handler push_right" tm-for="#login_modal" tm-role="close" onclick="main.login()">Bejelentkezés</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="create_profile_modal" class="modal spin_border">
+            <div class="modal_header">
+                <div class="modal_title">Új profil</div><button class="modal_handler icon_button" tm-for="#create_profile_modal" tm-role="close" tm-source="https://icons.getbootstrap.com/assets/icons/x-lg.svg"></button>
+            </div>
+            <div class="modal_main">
+                <div class="container">
+                    <div class="row input_row">
+                        <p>
+                            Email:
+                        </p>
+                        <input id="create_profile_email" autocomplete="email" autocapitalize="none" type="email" placeholder="john.doe@gmail.com">
+                    </div>
+                    <div class="row input_row">
+                        <p>
+                            Név:
+                        </p>
+                        <input id="create_profile_name" autocomplete="name" autocapitalize="on" type="name" placeholder="John Doe">
+                    </div>
+                    <div class="row input_row">
+                        <p>
+                            Jelszó:
+                        </p>
+                        <input id="create_profile_password" autocomplete="current-password" type="password" placeholder="Titok123">
+                    </div>
+                    <div class="row input_row">
+                        <p>
+                            Jelszó újból:
+                        </p>
+                        <input id="create_profile_password_again" autocomplete="current-password" type="password" placeholder="Titok123">
+                    </div>
+                    <div class="row">
+                        <button class="modal_handler push_right" onclick="main.create_profile()">Mehet!</button>
                     </div>
                 </div>
             </div>
@@ -180,5 +213,6 @@
         <script src="apis.js"></script>
         <script src="draw.js"></script>
         <script src="ui.js"></script>
+        <script src="main.js"></script>
     </body>
 </html>
