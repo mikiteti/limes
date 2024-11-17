@@ -1,3 +1,5 @@
+const boring = require("./boring");
+
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -108,6 +110,7 @@ const login = (body, res) => {
             return;
         }
 
+        user.success = "Bejelentkezés sikeres";
         res.json(user);
     });
 }
@@ -142,7 +145,7 @@ const set_user_property = (body, res) => {
     const { id, password, property_name, property_value } = body;
 
     authenticate_user(id, password, res, () => {
-        if (["name", "theme"].indexOf(property_name) == -1) {
+        if (["name", "theme", "password"].indexOf(property_name) == -1) {
             console.error({error: errors[7]});
             res.json({error: errors[7]});
             return;
@@ -156,11 +159,33 @@ const set_user_property = (body, res) => {
     });
 }
 
+const get_previews = (body, res) => {
+    const { user_id, password, current_previews } = body;
+
+    authenticate_user(user_id, password, res, () => {
+        limes.all('SELECT id, preview, preview_last_changed, authors, name, last_modified, creation_date, tags, creator, size FROM files WHERE authors LIKE "%,' + user_id + ',%"', (err, previews) => {
+            if (err) console.error(err.message);
+
+            const response = { success: "Előnézetek sikeresen lekérve", previews: [] };
+            for (const preview of previews) {
+                const current_preview = current_previews.find(p => p.id == preview.id);
+                if (current_preview && current_preview.last_changed == preview.preview_last_changed) continue;
+
+                preview.authors = boring.decrypt_authors(preview.authors);
+                response.previews.push(preview);
+            }
+
+            res.json(response);
+        });
+    });
+}
+
 const endpoints = {
     create_profile: create_profile,
     login: login,
     delete_profile: delete_profile,
     set_user_property: set_user_property,
+    get_previews: get_previews,
     get_file: get_file,
     new_file: new_file, 
     close_file: close_file,

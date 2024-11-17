@@ -17,6 +17,11 @@ const element = {
     create_profile_password_again: document.querySelector("#create_profile_password_again"),
     create_profile_modal: document.querySelector("#create_profile_modal"),
     theme_picker: document.querySelector("#theme_picker"),
+    settings_modal: document.querySelector("#settings_modal"),
+    settings_name: document.querySelector("#settings_name"),
+    settings_password: document.querySelector("#settings_password"),
+    settings_password_again: document.querySelector("#settings_password_again"),
+    files: document.querySelector("#files"),
 }
 
 const ui = {
@@ -36,6 +41,12 @@ const ui = {
 
     login (res) {
         element.current_user_name.innerHTML = res.name;
+        element.settings_name.value = "";
+        element.settings_name.setAttribute("placeholder", res.name);
+        element.settings_password.value = "";
+        element.settings_password.setAttribute("placeholder", res.password);
+        element.settings_password_again.value = "";
+        element.settings_password_again.setAttribute("placeholder", res.password);
         this.rerender_user_list();
         this.set_theme(res.theme);
     },
@@ -93,12 +104,14 @@ const ui = {
 
     theme_list: ["dark", "light"], // private
 
-    set_theme(theme) {
+    set_theme(theme = status.current_user.theme) {
         if (this.theme_list.indexOf(theme) == -1) {
-            this.message("Színmód nem található", "error");
+            this.message("A(z) " + theme + " színmód nem található", "error");
 
             return;
         } 
+
+        if (theme == ui.current_theme) return;
 
         tmui.set_theme(theme);
         element.theme_picker.checked = (theme=="dark");
@@ -106,5 +119,24 @@ const ui = {
 
     get current_theme() {
         for (const theme of this.theme_list) if (document.documentElement.classList.contains(theme)) return theme;
+    },
+
+    show_previews() {
+        element.files.innerHTML = "";
+        
+        for (const preview of local.limes.previews) {
+            if (preview.authors.indexOf(status.current_user.id) == -1) continue;
+
+            element.files.innerHTML += `
+                <div onclick="ui.open_file(this)" class="file_block holdable clickable" oncontextmenu="tmui.open_modal(document.querySelector('#note_info_modal'))">
+                    <div class="file_preview card spin_border" style="--border-spin-duration: 10s">
+                        ` + preview.preview + `
+                    </div>
+                    <p class="file_title">
+                        ` + preview.name + `
+                    </p>
+                </div>
+            `;
+        }
     },
 };

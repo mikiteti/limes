@@ -40,6 +40,17 @@ const apis = {
         });
     },
 
+    async get_previews(id = status.current_user.id, password = status.current_user.password, previews = local.limes.previews.map(preview => {return {id: preview.id, last_changed: preview.preview_last_changed}})) {
+        return await this.request({
+            api_name: "get_previews",
+            body: {
+                user_id: id,
+                password: password,
+                current_previews: previews,
+            }
+        })
+    },
+
     async set_user_property (id, password, property_name, property_value) {
         return await this.request({
             api_name: "set_user_property",

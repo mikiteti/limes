@@ -13,6 +13,19 @@ const local = {
         this.set("tm");
     },
 
+    set_previews(res) {
+        for (const new_preview of res.previews) {
+            let current_preview = this.limes.previews.find(p => p.id == new_preview.id);
+            if (!current_preview) {
+                this.limes.previews.push(new_preview);
+                continue;
+            }
+            this.limes.previews[this.limes.previews.indexOf(current_preview)] = new_preview;
+        }
+        
+        this.set("limes");
+    },
+
     set(which = "") {
         if (which) localStorage.setItem(which, JSON.stringify(this[which]));
         else {

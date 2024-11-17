@@ -111,11 +111,19 @@
                     <div class="row">
                         Sötét Mód <input id="theme_picker" class="push_right" checked type="checkbox" onclick="main.set_theme(this.checked ? 'dark' : 'light')">
                     </div>
-                    <div class="row">
-                        Subi Dubi
+                    <div class="row input_row">
+                        <p>Név</p>
+                        <input id="settings_name" type="text" name="settings_name" value="">
                     </div>
-                    <div class="row color_list" tm-colors="red green blue yellow purple magenta">
+                    <div class="row input_row">
+                        <p>Jelszó</p>
+                        <input id="settings_password" type="text" name="settings_password" value="">
                     </div>
+                    <div class="row input_row">
+                        <p>Jelszó újból</p>
+                        <input id="settings_password_again" type="text" name="settings_password_again" value="">
+                    </div>
+                    <button type="button" class="push_right" onclick="main.set_user_settings();">Mehet</button>
                 </div>
             </div>
         </div>

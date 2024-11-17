@@ -7,7 +7,12 @@ const main = {
             ui.login(res);
             local.set_users();
 
-            console.log(res);
+            apis.get_previews(status.current_user.id, status.current_user.password, previews = local.limes.previews.map(preview => {return {id: preview.id, last_changed: preview.preview_last_changed}})).then(res => {
+                if (boring.log_response(res) == "error") return;
+                
+                local.set_previews(res);
+                ui.show_previews();
+            });
         });
     },
 
@@ -38,12 +43,36 @@ const main = {
         apis.set_user_property(status.current_user.id, status.current_user.password, "theme", theme).then(res => {
             if (boring.log_response(res) == "error") return;
         });
+    },
+
+    set_user_settings(name = element.settings_name.value, password = element.settings_password.value, password_again = element.settings_password_again.value) {
+        if (password != password_again) {
+            ui.message("A jelszavak nem egyeznek.", "error");
+            return;
+        }
+        
+        if (name) {
+            status.current_user.name = name;
+            apis.set_user_property(status.current_user.id, status.current_user.password, "name", name).then(res => { if (boring.log_response(res) == "error") return; });
+        }
+        if (password) {
+            status.current_user.password = password;
+            apis.set_user_property(status.current_user.id, status.current_user.password, "password", password).then(res => { if (boring.log_response(res) == "error") return; });
+        } 
+
+        console.log(status.current_user);
+        ui.login(status.current_user);
+        local.set_users();
+
+        tmui.close_modal(element.settings_modal);
     }
 }
 
 const onload = () => {
     status.users = local.tm.users;
     status.current_user = status.users.find(user => user.id == local.limes.active_user_id);
-    main.login(status.current_user.id, status.current_user.password);
+    if (status.current_user) {
+        main.login(status.current_user.id, status.current_user.password);
+    }
 }
 window.addEventListener("load", onload);
