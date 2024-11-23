@@ -51,25 +51,36 @@ const apis = {
         })
     },
 
-    async set_user_property (id, password, property_name, property_value) {
+    async set_user_property (id, password, properties) {
         return await this.request({
             api_name: "set_user_property",
             body: {
                 id: id,
                 password: password,
-                property_name: property_name,
-                property_value: property_value,
+                properties: properties,
             }
         });
     },
 
-    async get_file(file_id = status.current_file.id, user_id = status.current_user.id, password = status.current_user.password) {
+    async get_file(user_id = status.current_user.id, password = status.current_user.password, file_id = status.current_file.id) {
         return await this.request({
             api_name: "get_file",
             body: {
-                file_id: file_id,
                 user_id: user_id,
-                password: password
+                password: password,
+                file_id: file_id,
+            }
+        });
+    },
+
+    async set_file_data(data, user_id = status.current_user.id, password = status.current_user.password, file_id = status.current_file.id) {
+        return await this.request({
+            api_name: "set_file_data",
+            body: {
+                user_id: user_id,
+                password: password,
+                file_id: file_id,
+                data: data,
             }
         });
     }

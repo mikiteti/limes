@@ -7,7 +7,7 @@ const main = {
             ui.login(res);
             local.set_users();
 
-            apis.get_previews(status.current_user.id, status.current_user.password, previews = local.limes.previews.map(preview => {return {id: preview.id, last_changed: preview.preview_last_changed}})).then(res => {
+            apis.get_previews(status.current_user.id, status.current_user.password, previews = local.limes.previews.map(preview => {return {id: preview.id, last_changed: preview.preview_last_changed}})).then(res => {main
                 if (boring.log_response(res) == "error") return;
                 
                 local.set_previews(res);
@@ -40,7 +40,7 @@ const main = {
 
         status.current_user.theme = theme;
         local.set_users();
-        apis.set_user_property(status.current_user.id, status.current_user.password, "theme", theme).then(res => {
+        apis.set_user_property(status.current_user.id, status.current_user.password, { "theme": theme }).then(res => {
             if (boring.log_response(res) == "error") return;
         });
     },
@@ -53,11 +53,11 @@ const main = {
         
         if (name) {
             status.current_user.name = name;
-            apis.set_user_property(status.current_user.id, status.current_user.password, "name", name).then(res => { if (boring.log_response(res) == "error") return; });
+            apis.set_user_property(status.current_user.id, status.current_user.password, { "name": name }).then(res => { if (boring.log_response(res) == "error") return; });
         }
         if (password) {
             status.current_user.password = password;
-            apis.set_user_property(status.current_user.id, status.current_user.password, "password", password).then(res => { if (boring.log_response(res) == "error") return; });
+            apis.set_user_property(status.current_user.id, status.current_user.password, { "password": password }).then(res => { if (boring.log_response(res) == "error") return; });
         } 
 
         console.log(status.current_user);
@@ -65,12 +65,30 @@ const main = {
         local.set_users();
 
         tmui.close_modal(element.settings_modal);
-    }
+    },
+
+    toggle_tag(element) {
+        const tag = status.current_user.limes.tags.find(tag => tag.id == element.getAttribute("d-id"));
+
+        tag.active = !tag.active;
+
+        ui.show_previews();
+    },
+
+    open_file(file_block) {
+        const file_id = parseInt(file_block.querySelector("svg").getAttribute("d-id"));
+        
+        apis.get_file(status.current_user.id, status.current_user.password, file_id).then(res => {
+            if (boring.log_response(res) == "error") return;
+
+            boring.import_file(file_id, res.content);
+        });
+        ui.open_file(file_block);
+    },
 }
 
 const onload = () => {
-    status.users = local.tm.users;
-    status.current_user = status.users.find(user => user.id == local.limes.active_user_id);
+    status.current_user = local.tm.users.find(user => user.id == local.limes.active_user_id);
     if (status.current_user) {
         main.login(status.current_user.id, status.current_user.password);
     }

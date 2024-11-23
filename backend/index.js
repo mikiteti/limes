@@ -13,12 +13,12 @@ const authenticate_user = (id, password, res, callback) => {
     tm.get("SELECT password FROM users WHERE id = ?", [id], (err, user) => {
         if (err) console.error(err.message);
         if (user == undefined) {
-            console.log({ error: errors[0] });
+            console.error({ error: errors[0] });
             res.json({ error: errors[0] });
             return;
         }
         if (user.password != password) {
-            console.log({ error: errors[1] });
+            console.error({ error: errors[1] });
             res.json({ error: errors[1] });
             return;
         }
@@ -38,13 +38,8 @@ const errors = [
     { id: 5, name: "Ez az email cím már foglalt." },
     { id: 6, name: "Helytelen email."},
     { id: 7, name: "A változtatni próbált beállítás nem található vagy nem változtatható."},
+    { id: 8, name: "A változtatni próbált adat nem található vagy nem változtatható."},
 ];
-
-const get_file = (body, res) => {
-    authenticate_user(body.user_id, body.password, res, () => {
-        res.json("Success: user identified.");
-    });
-}
 
 const new_file = (body, res) => {
 
@@ -74,7 +69,7 @@ const create_profile = (body, res) => {
     tm.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
         if (err) console.error(err.message);
         if (user) {
-            console.log({error:errors[5]});
+            console.error({error:errors[5]});
             res.json({error:errors[5]});
             return;
         }
@@ -110,8 +105,15 @@ const login = (body, res) => {
             return;
         }
 
-        user.success = "Bejelentkezés sikeres";
-        res.json(user);
+        limes.all("SELECT * FROM tags WHERE author = ?", [user.id], (err2, tags) => {
+            if (err2) console.error(err2.message);
+
+            tags.forEach(tag => tag.resultants = boring.decrypt_array(tag.resultants));
+            user.limes = {tags: tags};
+
+            user.success = "Bejelentkezés sikeres";
+            res.json(user);
+        });
     });
 }
 
@@ -142,16 +144,16 @@ const delete_profile = (body, res) => {
 }
 
 const set_user_property = (body, res) => {
-    const { id, password, property_name, property_value } = body;
+    const { id, password, properties } = body;
+
+    if (!boring.validate_properties(properties)) {
+        console.error({error: errors[7]});
+        res.json({error: errors[7]});
+        return;
+    }
 
     authenticate_user(id, password, res, () => {
-        if (["name", "theme", "password"].indexOf(property_name) == -1) {
-            console.error({error: errors[7]});
-            res.json({error: errors[7]});
-            return;
-        }
-
-        tm.run("UPDATE users SET " + property_name + " = ? WHERE id = ?", [property_value, id], (err) => {
+        tm.run("UPDATE users SET " + Object.getOwnPropertyNames(properties).map(property => property + (typeof properties[property] == "string" ? " = \"" : " = ") + String(properties[property]) + (typeof properties[property] == "string" ? "\"" : "")).toString() + " WHERE id = ?", [id], (err) => {
             if (err) console.error(err.message);
 
             res.json({success: "Beállítás megváltoztatva."})
@@ -171,11 +173,67 @@ const get_previews = (body, res) => {
                 const current_preview = current_previews.find(p => p.id == preview.id);
                 if (current_preview && current_preview.last_changed == preview.preview_last_changed) continue;
 
-                preview.authors = boring.decrypt_authors(preview.authors);
+                preview.authors = boring.decrypt_array(preview.authors);
+                preview.tags = boring.decrypt_array(preview.tags);
                 response.previews.push(preview);
             }
 
             res.json(response);
+        });
+    });
+}
+
+const get_file = (body, res) => {
+    const { user_id, password, file_id } = body;
+
+    authenticate_user(user_id, password, res, () => {
+        limes.get("SELECT content, authors, acted_out FROM files WHERE id = ?", [file_id], (err, file) => {
+            if (err) console.error(err.message);
+
+            if (boring.decrypt_array(file.authors).indexOf(user_id) == -1) {
+                console.error({error:errors[3]});
+                res.json({error:errors[3]});
+                return;
+            }
+
+            if (!file.acted_out) {
+                act_out(file_id, callback);
+                return;
+            }
+
+            file.authors;
+            delete file.acted_out;
+            file.content = JSON.parse(file.content);
+            file.success = "Fájl sikeresen lekérve";
+            res.json(file);
+        });
+    });
+}
+
+const set_file_data = (body, res) => {
+    const { user_id, password, file_id, data } = body;
+
+    if (!boring.validate_data(data)) {
+        console.error({error: errors[8]});
+        res.json({error: errors[8]});
+        return;
+    }
+
+    authenticate_user(user_id, password, res, () => {
+        limes.get("SELECT authors FROM files WHERE id = ?", [file_id], (err, file) => {
+            if (err) console.error(err.message);
+
+            if (boring.decrypt_array(file.authors).indexOf(user_id) == -1) {
+                console.error({error:errors[3]});
+                res.json({error:errors[3]});
+                return;
+            }
+
+            limes.run("UPDATE users SET " + Object.getOwnPropertyNames(data).map(name => name + (typeof data[name] == "string" ? " = \"" : " = ") + String(data[name]) + (typeof data[name] == "string" ? "\"" : "")).toString() + " WHERE id = ?", [id], (err2) => {
+                if (err2) console.error(err.message);
+
+                res.json({success: "Fájladat átírva"});
+            });
         });
     });
 }
@@ -187,9 +245,11 @@ const endpoints = {
     set_user_property: set_user_property,
     get_previews: get_previews,
     get_file: get_file,
+    set_file_data: set_file_data,
     new_file: new_file, 
     close_file: close_file,
     register_action: register_action,
+
 }
 
 app.post("/request", (req, res) => {

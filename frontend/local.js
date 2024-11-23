@@ -1,10 +1,15 @@
 const local = {
     tm: JSON.parse(localStorage.getItem("tm")) || {users:[]},
-    limes: JSON.parse(localStorage.getItem("limes")) || {previews:[],active_user_id:[]},
+    limes: JSON.parse(localStorage.getItem("limes")) || {previews:[],active_user_id: undefined},
+
+    erase_all() {
+        this.tm = null;
+        this.limes = null;
+        this.set();
+    },
 
     set_users() {
-        this.tm.users = status.users;
-        this.limes.active_user_id = status.current_user.id;
+        this.limes.active_user_id = (status.current_user || {id: undefined}).id;
         this.set();
     },
 
@@ -36,31 +41,44 @@ const local = {
 };
 
 const status = {
-    current_file: {
-        get id() { if (!element.canvas) return false; return element.canvas.getAttribute("d-id") },
+    settings: {
+        cell_size: .1,
     },
 
-    current_user: { },
+    current_file: {
+        get id() { if (!element.canvas) return false; return element.canvas.getAttribute("d-id") },
+        get local() { return local.limes.previews.find(preview => preview.id == this.id) },
+    },
 
-    files: [
-        { id: 1, title: "New file" },
-        { id: 2, title: "New file" },
-    ],
+    get current_user() { return local.tm.users.find(user => user.id == local.limes.active_user_id) },
 
-    users: [ ],
+    get active_tags() {
+        if (!this.current_user) return false;
+        return this.current_user.limes.tags.filter(tag => tag.active);
+    },
 
     login (res) {
-        let user_in_memory = this.users.find(user => user.id == res.id);
-        if (user_in_memory) this.users[this.users.indexOf(user_in_memory)] = res;
-        else this.users.push(res);
-
-        this.current_user = this.users.find(user => user.id == res.id);
+        local.limes.active_user_id = res.id;
+        let user_in_memory = local.tm.users.find(user => user.id == res.id);
+        if (user_in_memory) local.tm.users[local.tm.users.indexOf(user_in_memory)] = res;
+        else local.tm.users.push(res);
     },
 
     logout () {
         if (this.current_user.id == undefined) return;
-        this.users.splice(this.users.indexOf(this.current_user), 1);
-        this.current_user = {};
-    }
+        local.tm.users.splice(local.tm.users.indexOf(this.current_user), 1);
+    },
+
+    toolbar: {},
+
+    page: {},
+
+    strokes: {
+        all: [],
+        get alive() { return this.all.filter(s => !s.deleted) },
+        get deleted() { return this.all.filter(s => s.deleted) },
+    },
+
+    grid: [],
 };
 

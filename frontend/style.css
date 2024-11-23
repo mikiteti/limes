@@ -67,3 +67,7 @@
     height: 1em;
     font-size: 1em;
 }
+
+#note_info_tags_list {
+    background-color: var(--color-background);
+}

@@ -22,6 +22,12 @@ const element = {
     settings_password: document.querySelector("#settings_password"),
     settings_password_again: document.querySelector("#settings_password_again"),
     files: document.querySelector("#files"),
+    note_info_modal: document.querySelector("#note_info_modal"),
+    note_info_title: document.querySelector("#note_info_title"),
+    note_info_title_input: document.querySelector("#note_info_title_input"),
+    note_info_tags_list: document.querySelector("#note_info_tags_list"),
+    tags_list: document.querySelector("#tags_list"),
+    toolbar: document.querySelector("#tools"),
 }
 
 const ui = {
@@ -32,11 +38,32 @@ const ui = {
     rerender_user_list () { // private
         while (!element.users_modal.children[0].classList.contains("gap_before")) element.users_modal.children[0].remove();
 
-        for (const user of status.users) {
+        for (const user of local.tm.users) {
             element.users_modal.innerHTML = '<div class="horizontal_button" onclick="main.login(' + user.id + ', \'' + user.password + '\')">' + user.name + '</div>' + element.users_modal.innerHTML;
         }
 
         tmui.close_modal(element.users_modal);
+    },
+
+    rerender_tags_list () {
+        element.tags_list.innerHTML = "";
+        
+        if (!status.current_user) return;
+        
+        for (const tag of status.current_user.limes.tags) {
+            element.tags_list.innerHTML += `
+                <div class="toggle" d-id="` + tag.id + `" onclick="main.toggle_tag(this)">       
+                    ` + tag.name + `
+                </div>
+            `; 
+            
+            element.note_info_tags_list.innerHTML += `
+                <div class="toggle" d-id="` + tag.id + `">       
+                    ` + tag.name + `
+                </div>
+            `
+        }
+
     },
 
     login (res) {
@@ -48,12 +75,15 @@ const ui = {
         element.settings_password_again.value = "";
         element.settings_password_again.setAttribute("placeholder", res.password);
         this.rerender_user_list();
+        this.rerender_tags_list();
         this.set_theme(res.theme);
     },
 
     logout () {
         element.current_user_name.innerHTML = "Profil";
         this.rerender_user_list();
+        this.rerender_tags_list();
+        this.show_previews();
     },
 
     open_file(file_block) {
@@ -61,7 +91,7 @@ const ui = {
         const rect = file_preview.getBoundingClientRect();
         const inset = (rect.top - window.scrollY) + "px " + (window.innerWidth-rect.left-rect.width) + "px " + (window.innerHeight-rect.top-rect.height+window.scrollY) + "px " + rect.left + "px";
         element.canvas_wrap.innerHTML = file_preview.innerHTML;
-        element.title.setAttribute("placeholder", status.files.find(f => f.id == status.current_file.id).title);
+        element.title.setAttribute("placeholder", local.limes.previews.find(f => f.id == status.current_file.id).name);
         element.title.value = "";
         element.draw_screen.style.display = "block";
         element.draw_screen.animate([
@@ -122,13 +152,19 @@ const ui = {
     },
 
     show_previews() {
-        element.files.innerHTML = "";
-        
-        for (const preview of local.limes.previews) {
-            if (preview.authors.indexOf(status.current_user.id) == -1) continue;
+        const active_tags = status.active_tags;
 
-            element.files.innerHTML += `
-                <div onclick="ui.open_file(this)" class="file_block holdable clickable" oncontextmenu="tmui.open_modal(document.querySelector('#note_info_modal'))">
+        for (const preview of local.limes.previews) {
+            let show_element = true;
+            if (!status.current_user || preview.authors.indexOf(status.current_user.id) == -1) show_element = false;
+
+            if (show_element) for (const tag of active_tags) if (preview.tags.find(id => id == tag.id) == undefined) {
+                show_element = false;
+                break;
+            }
+            
+            if (element.files.querySelector("svg[d-id=\"" + preview.id + "\"]") == undefined) element.files.innerHTML += `
+                <div onclick="main.open_file(this)" class="file_block holdable clickable" oncontextmenu="ui.open_note_info_modal(this)">
                     <div class="file_preview card spin_border" style="--border-spin-duration: 10s">
                         ` + preview.preview + `
                     </div>
@@ -137,6 +173,33 @@ const ui = {
                     </p>
                 </div>
             `;
+
+            element.files.querySelector("svg[d-id=\"" + preview.id + "\"]").parentElement.parentElement.style.display = (show_element ? "block" : "none");
+        }
+    },
+
+    open_note_info_modal(file_block) {
+        const file_id = file_block.querySelector("svg").getAttribute("d-id");
+        const preview = local.limes.previews.find(p => p.id == file_id);
+
+        element.note_info_title.innerHTML = preview.name;
+        element.note_info_title_input.value = "";
+        element.note_info_title_input.setAttribute("placeholder", preview.name);
+
+        tmui.open_modal(element.note_info_modal);
+    },
+
+    get binary_theme() {
+        const light_themes = ["light"];
+
+        if (light_themes.indexOf(this.current_theme) == -1) return "dark";
+        return "light";
+    },
+
+    show_tools() {
+        element.toolbar.innerHTML = "";
+
+        for (const tool of status.toolbar.tools) {
         }
     },
 };
