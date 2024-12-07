@@ -71,3 +71,7 @@
 #note_info_tags_list {
     background-color: var(--color-background);
 }
+
+svg * {
+    pointer-events: none;
+}

@@ -27,7 +27,7 @@ const element = {
     note_info_title_input: document.querySelector("#note_info_title_input"),
     note_info_tags_list: document.querySelector("#note_info_tags_list"),
     tags_list: document.querySelector("#tags_list"),
-    toolbar: document.querySelector("#tools"),
+    tools: document.querySelector("#tools"),
 }
 
 const ui = {
@@ -199,7 +199,7 @@ const ui = {
     show_tools() {
         element.toolbar.innerHTML = "";
 
-        for (const tool of status.toolbar.tools) {
+        for (const tool of toolbar.tools) {
         }
     },
 };

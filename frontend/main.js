@@ -92,5 +92,15 @@ const onload = () => {
     if (status.current_user) {
         main.login(status.current_user.id, status.current_user.password);
     }
+
+    window.addEventListener("mousedown", (e) => {
+        if (e.target == element.canvas) mouse.down(e);
+    });
+    window.addEventListener("mousemove", (e) => {
+        if (e.target == element.canvas) mouse.move(e);
+    });
+    window.addEventListener("mouseup", (e) => {
+        if (e.target == element.canvas) mouse.up(e);
+    });
 }
 window.addEventListener("load", onload);

@@ -43,6 +43,7 @@ const local = {
 const status = {
     settings: {
         cell_size: .1,
+        minimal_stroke_radius: .00025,
     },
 
     current_file: {
@@ -68,17 +69,4 @@ const status = {
         if (this.current_user.id == undefined) return;
         local.tm.users.splice(local.tm.users.indexOf(this.current_user), 1);
     },
-
-    toolbar: {},
-
-    page: {},
-
-    strokes: {
-        all: [],
-        get alive() { return this.all.filter(s => !s.deleted) },
-        get deleted() { return this.all.filter(s => s.deleted) },
-    },
-
-    grid: [],
 };
-

@@ -41,22 +41,6 @@ const errors = [
     { id: 8, name: "A változtatni próbált adat nem található vagy nem változtatható."},
 ];
 
-const new_file = (body, res) => {
-
-}
-
-const register_action = (body, res) => {
-
-}
-
-const close_file = (body, res) => {
-
-}
-
-const update_tag = (body, res) => {
-
-}
-
 const create_profile = (body, res) => {
     const { email, name, password, theme } = body;
 
