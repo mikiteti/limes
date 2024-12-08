@@ -1,9 +1,7 @@
 let toolbar = {
 
 }, page = {
-    stroke_count = 0,
-    current_stroke_iterations = [],
-
+    stroke_count: 0,
 }, strokes = {
     all: [],
     get alive() { return this.all.filter(s => !s.deleted) },
@@ -54,19 +52,19 @@ class stroke {
     }
 
     create_last_node() {
-       let index = page.current_stroke_iterations[0].length;
+       let index = this.iterations[0].length;
 
         for (let d = 0; d <= Math.min(this.tool.smoothness, this.nodes.length); d++) {
-            page.current_stroke_iterations[d][index-d] = boring.calculate_iteration_value(index-d, d);
+            this.iterations[d][index-d] = boring.calculate_iteration_value(index-d, d);
         }
     
-        index = page.current_stroke_iterations[0].length;
+        index = this.iterations[0].length;
         let new_coord = undefined;
         if (this.nodes.length <= this.tool.smoothness) {
-            if (index % 2 == 1) new_coord = page.current_stroke_iterations[(index-1) / 2][(index-1) / 2];
+            if (index % 2 == 1) new_coord = this.iterations[(index-1) / 2][(index-1) / 2];
         } else {
-            new_coord = page.current_stroke_iterations.at(-1).at(-1);
-            for (const i of page.current_stroke_iterations) i.shift();
+            new_coord = this.iterations.at(-1).at(-1);
+            for (const i of this.iterations) i.shift();
         }
     
         if (new_coord) {
@@ -100,6 +98,7 @@ class stroke {
 
         this.grid_cells = [];
         this.element = undefined;
+        this.iterations = [];
 
         ({canvas: strokes.all, preview: []})[type].push(this);
 
@@ -117,15 +116,14 @@ class stroke {
                     this.undisplayed_rows.push(status.undisplayed_strokes[i]);
                 }
             } else {
-                nodes.forEach(n => { this.check_min_max_and_grid(n) });
+                for (const n of nodes) this.check_min_max_and_grid(n);
             }
         }
     }
 }
 
-const mouse = {
-    touch_screen: ( 'ontouchstart' in window ) ||  ( navigator.msMaxTouchPoints > 0 ),
-    pos: [0, 0],
+const pointer = {
+    pointers: {},
 
     down(e) {
         down.initialize_globals(e);
@@ -133,33 +131,41 @@ const mouse = {
 
     move(e) {
         move.initialize_globals(e);
-        if (!mouse.is_down) return;
     },
 
     up(e) {
         up.initialize_globals(e);
-    }
+    },
+
+    get pen() { return this.pointers.find(p => p.type == "pen") },
+
+    get active() { return this.pen || this.pointers[0] },
 }
 
 const down = {
     initialize_globals(e) {
-        mouse.type = boring.get_mouse_type(e);
-        mouse.prev_pos = [...mouse.pos];
-        mouse.pos = boring.get_coordinates(e);
-        mouse.is_down = true;
+        const { pointerId, pointerType } = e;
+        pointer.pointers[pointerId] = {
+            pos: [1000 / window.innerWidth * e.offsetX, 1000 / window.innerWidth * e.offsetY], 
+            type: pointerType, 
+            prev_pos:this.pos
+        };
     },
 }
 
 const move = {
     initialize_globals(e) {
-        mouse.type = boring.get_mouse_type(e);
-        mouse.prev_pos = [...mouse.pos];
-        mouse.pos = boring.get_coordinates(e);
+        const { pointerId, pointerType } = e;
+        if (pointer.pointers[pointerId] == undefined) return;
+
+        const current_pointer = pointer.pointers[pointerId];
+        current_pointer.prev_pos = [...current_pointer.pos];
+        current_pointer.pos = [e.offsetX, e.offsetY];
     },
 }
 
 const up = {
     initialize_globals(e) {
-        mouse.is_down = false;
+        delete pointer.pointers[e.pointerId];
     },
 }

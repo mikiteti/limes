@@ -230,10 +230,6 @@ const endpoints = {
     get_previews: get_previews,
     get_file: get_file,
     set_file_data: set_file_data,
-    new_file: new_file, 
-    close_file: close_file,
-    register_action: register_action,
-
 }
 
 app.post("/request", (req, res) => {

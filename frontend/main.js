@@ -93,14 +93,14 @@ const onload = () => {
         main.login(status.current_user.id, status.current_user.password);
     }
 
-    window.addEventListener("mousedown", (e) => {
-        if (e.target == element.canvas) mouse.down(e);
+    window.addEventListener("pointerdown", (e) => {
+        if (e.target == element.canvas) pointer.down(e);
     });
-    window.addEventListener("mousemove", (e) => {
-        if (e.target == element.canvas) mouse.move(e);
+    window.addEventListener("pointermove", (e) => {
+        if (e.target == element.canvas) pointer.move(e);
     });
-    window.addEventListener("mouseup", (e) => {
-        if (e.target == element.canvas) mouse.up(e);
+    window.addEventListener("pointerup", (e) => {
+        if (e.target == element.canvas) pointer.up(e);
     });
 }
 window.addEventListener("load", onload);
