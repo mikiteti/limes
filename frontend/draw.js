@@ -1,7 +1,16 @@
 let toolbar = {
-
+    tools: [
+        {
+            type: "pen",
+            color: "white",
+            radius: 0.01,
+            smoothness: 5,
+        }
+    ],
 }, page = {
+    current_iterations: [],
     stroke_count: 0,
+    current_tool: toolbar.tools[0],
 }, strokes = {
     all: [],
     get alive() { return this.all.filter(s => !s.deleted) },
@@ -52,19 +61,19 @@ class stroke {
     }
 
     create_last_node() {
-       let index = this.iterations[0].length;
+       let index = page.current_iterations[0].length;
 
         for (let d = 0; d <= Math.min(this.tool.smoothness, this.nodes.length); d++) {
-            this.iterations[d][index-d] = boring.calculate_iteration_value(index-d, d);
+            page.current_iterations[d][index-d] = boring.calculate_iteration_value(index-d, d);
         }
     
-        index = this.iterations[0].length;
+        index = page.current_iterations[0].length;
         let new_coord = undefined;
         if (this.nodes.length <= this.tool.smoothness) {
-            if (index % 2 == 1) new_coord = this.iterations[(index-1) / 2][(index-1) / 2];
+            if (index % 2 == 1) new_coord = page.current_iterations[(index-1) / 2][(index-1) / 2];
         } else {
-            new_coord = this.iterations.at(-1).at(-1);
-            for (const i of this.iterations) i.shift();
+            new_coord = page.current_iterations.at(-1).at(-1);
+            for (const i of page.current_iterations) i.shift();
         }
     
         if (new_coord) {
@@ -98,7 +107,6 @@ class stroke {
 
         this.grid_cells = [];
         this.element = undefined;
-        this.iterations = [];
 
         ({canvas: strokes.all, preview: []})[type].push(this);
 
@@ -106,7 +114,19 @@ class stroke {
         if (current) page.current_stroke = this;
 
         if (!nodes.length) { // being drawn by user right now
+            page.stroke_count++;
+            
+            let grid_cell = boring.get_grid_cell_at(...pointers.active.pos);
+            grid_cell.push(this);
+            this.grid_cells.push(grid_cell);
 
+            page.current_iterations = [];
+            for (let i = 0; i < page.current_tool.smoothness; i++) page.current_iterations.push([]);
+
+            this.create_last_node();
+            // this.nodes.push([...pointers.active.pos]);
+            // this.min = {x: pointers.active.pos[0], y: pointers.active.pos[1]};
+            // this.max = JSON.parse(JSON.stringify(this.min));
         } else { // being imported
             this.element = element.canvas.querySelector("[d-id=stroke-" + index + "]");
             this.undisplayed_rows = [];
@@ -127,6 +147,10 @@ const pointer = {
 
     down(e) {
         down.initialize_globals(e);
+
+        switch (page.current_tool.type) {
+            case "pen": new stroke; break;
+        }
     },
 
     move(e) {

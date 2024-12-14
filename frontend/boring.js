@@ -48,7 +48,7 @@ const boring = {
 
     calculate_iteration_value (x, y) {
         if (y == 0) return pointer.active.pos;
-        const csi = page.current_stroke.iterations;
+        const csi = page.current_iterations;
         return [
             (csi[y-1][Math.max(x-1,0)][0] + csi[y-1][x][0] + csi[y-1][x+1][0]) / 3,
             (csi[y-1][Math.max(x-1,0)][1] + csi[y-1][x][1] + csi[y-1][x+1][1]) / 3
